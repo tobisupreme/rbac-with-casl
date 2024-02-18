@@ -17,12 +17,15 @@ export class UsersService {
   }
 
   async findAll() {
-    return await this.prismaClient.user.findMany({});
+    return await this.prismaClient.user.findMany({
+      select: { id: true, email: true, role: true },
+    });
   }
 
   async findOne(id: number) {
     return await this.prismaClient.user.findUniqueOrThrow({
       where: { id },
+      include: { role: true },
     });
   }
 
@@ -31,6 +34,10 @@ export class UsersService {
       where: { id },
       data: { ...updateUserDto },
     });
+  }
+
+  async getProfile(sub: number) {
+    return await this.findOne(sub);
   }
 
   remove(id: number) {

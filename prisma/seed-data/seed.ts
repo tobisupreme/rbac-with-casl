@@ -147,6 +147,23 @@ async function main() {
       update: user,
     });
   }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  for await (const { id, roleId, subject, ...permission } of permissions) {
+    await prisma.permission.upsert({
+      where: { id },
+      create: { ...permission },
+      update: { ...permission },
+    });
+  }
+
+  await prisma.rolePermission.createMany({
+    skipDuplicates: true,
+    data: permissions.map(({ id, roleId }) => ({
+      permissionId: id,
+      roleId,
+    })),
+  });
 }
 
 main()

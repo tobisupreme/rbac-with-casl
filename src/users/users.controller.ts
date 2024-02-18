@@ -1,16 +1,22 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Request,
+  UseGuards,
 } from '@nestjs/common';
-import { UsersService } from './users.service';
+import { ApiTags } from '@nestjs/swagger';
+import { PermissionAction } from '../auth/casl-ability.factory/casl-ability.factory';
+import { CheckPermissions } from '../auth/decorators/permissions.decorator';
+import { PermissionsGuard } from '../auth/guards/permissions.guard';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { UsersService } from './users.service';
+// import { AuthGuard } from '../auth/guards/auth.guard';
 
 @ApiTags('Users')
 @Controller('users')
@@ -22,9 +28,17 @@ export class UsersController {
     return this.usersService.create(createUserDto);
   }
 
+  @UseGuards(PermissionsGuard)
+  @CheckPermissions([PermissionAction.READ, 'dashboard'])
   @Get()
   findAll() {
     return this.usersService.findAll();
+  }
+
+  // @UseGuards(AuthGuard)
+  @Get('/me')
+  findMe(@Request() req: any) {
+    return this.usersService.findOne(req.user.sub);
   }
 
   @Get(':id')
